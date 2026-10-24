@@ -30,8 +30,8 @@ export function SiteHeader({ app = false }: { app?: boolean }) {
     { href: "/#how-it-works", label: "Help", icon: FileText }
   ] : [
     { href: "/", label: "Home" }, { href: "/#product", label: "Product" },
-    { href: "/#use-cases", label: "Use Cases" }, { href: "/#developers", label: "Developers" },
-    { href: "/#pricing", label: "Pricing" }
+    { href: "/#use-cases", label: "Use Cases" }, { href: "/#protocol", label: "Protocol" },
+    { href: "/#privacy", label: "Privacy" }, { href: "/#pricing", label: "Pricing" }
   ];
   return <header className="site-header"><div className="header-inner shell">
     <Brand />
@@ -53,7 +53,7 @@ export function SiteHeader({ app = false }: { app?: boolean }) {
 }
 
 export function SiteFooter() {
-  return <footer className="site-footer"><div className="shell footer-inner"><div className="footer-brand"><Brand/><span>Secure documents. Real world prints.</span></div><div className="footer-links"><Link href="/#product">Product</Link><Link href="/#how-it-works">Help</Link><Link href="/#developers">Developers</Link><Link href="/#pricing">Pricing</Link></div><div className="monad-footer">Built on <strong>Monad</strong><span>For a more open world.</span></div></div></footer>;
+  return <footer className="site-footer"><div className="shell footer-inner"><div className="footer-brand"><Brand/><span>Secure documents. Real world prints.</span></div><div className="footer-links"><Link href="/#product">Product</Link><Link href="/#protocol">Protocol</Link><Link href="/#privacy">Privacy</Link><Link href="/#pricing">Pricing</Link></div><div className="monad-footer">Designed for <strong>Monad</strong><span>For a more open world.</span></div></div></footer>;
 }
 
 export function StepTitle({ number, title, subtitle, action }: { number: number; title: string; subtitle?: string; action?: React.ReactNode }) {

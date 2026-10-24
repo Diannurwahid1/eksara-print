@@ -8,7 +8,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Eksara — Secure document sharing for print",
-  description: "Upload a document, set print preferences and share one-time access with a print shop. Powered by Monad.",
+  description: "Eksara is a private document sharing and one-time print protocol designed for Monad. Explore customer, print shop, and pricing workflows.",
   icons: { icon: "/images/eksara-mark.png", apple: "/images/eksara-mark.png" }
 };
 
