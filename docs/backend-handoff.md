@@ -13,7 +13,7 @@
 | Eksara Station | Separate Electron desktop application | Claim an authorized job, download the document, select printer, monitor spooler |
 | Central API | NestJS | Identity, access control, private files, orders, shop routing, state machine, Monad relayer |
 
-The supplied PRD describes guest customer orders. **The user's current instruction supersedes that for this MVP: customer login is Google OAuth.** Shop staff authenticate with separate shop roles; a customer account must never grant station or shop permissions.
+An earlier source PRD described guest customer orders. **The current Eksara PRD and user instruction use Google OAuth for customer login.** Shop staff authenticate with separate shop roles; a customer account must never grant station or shop permissions.
 
 Both web and desktop call the same versioned NestJS API. Keep business logic out of Next.js route handlers. Use an OpenAPI document and generate a typed client for both applications after backend DTOs stabilize.
 

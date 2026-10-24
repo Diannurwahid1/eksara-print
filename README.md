@@ -4,6 +4,14 @@ This repository currently implements the **customer-facing frontend** in `apps/w
 
 The project uses Next.js + TypeScript, Tailwind CSS, a separate NestJS API, and a separate Electron Print Station. The API and desktop app are **specified, not implemented** in this repository. See [docs/backend-handoff.md](docs/backend-handoff.md).
 
+## Product documents
+
+- [Eksara PRD and architecture draft](docs/Eksara_PRD_Monad_Blitz_v1.md)
+- [Eksara BRD](docs/Eksara_BRD_Monad_Blitz_v1.md)
+- [Backend and Print Station handoff](docs/backend-handoff.md)
+
+The PRD and BRD are adapted copies of the supplied planning documents. They retain draft assumptions and distinguish planned capabilities from implemented frontend behavior.
+
 ## Run locally
 
 ```bash
