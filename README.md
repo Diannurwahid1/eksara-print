@@ -1,67 +1,95 @@
-# Eksara web and desktop MVP
+# Eksara
 
-This repository implements the customer web app, NestJS API, Monad contract, and an Electron print shop workspace. The web app includes a landing page, Google sign-in, wallet verification, file preparation, print preferences, share link/PIN/QR, WhatsApp/email sharing, order history, and SumoPod subscription checkout. Station follows the supplied dashboard mockup with a queue, request review, print controls, printer discovery, and a one-time handoff bridge.
+Eksara adalah aplikasi untuk menyiapkan dokumen cetak dari web pelanggan dan menyerahkannya ke aplikasi desktop percetakan (**Eksara Station**) melalui tautan dan PIN. Izin cetak sekali pakai dicatat di Monad; isi dokumen tetap berada di penyimpanan privat milik server API, bukan di blockchain.
 
-The project uses Next.js + TypeScript, Tailwind CSS, Electron + React, a NestJS API with private local file storage, and a Monad smart contract. The physical printer adapter is not implemented. See [backend implementation status](docs/backend-implementation.md).
+**Coba versi live:** [ekasra.web.id](https://ekasra.web.id/) · [Masuk ke aplikasi](https://ekasra.web.id/login)
 
-## Product documents
+Repositori ini berisi web Next.js, API NestJS, aplikasi Electron, kontrak Solidity, dan database PostgreSQL. Ada dua cara mencobanya:
 
-- [Eksara PRD and architecture draft](docs/Eksara_PRD_Monad_Blitz_v1.md)
-- [Eksara BRD](docs/Eksara_BRD_Monad_Blitz_v1.md)
-- [Backend and Print Station handoff](docs/backend-handoff.md)
-- [Current backend implementation and deployment handoff](docs/backend-implementation.md)
+| Mode | Untuk siapa | Yang dibutuhkan |
+| --- | --- | --- |
+| **Demo lokal** | Ingin melihat web dan mencoba antarmuka secepatnya | Node.js dan pnpm; **tanpa akun atau secret** |
+| **Terhubung end-to-end** | Ingin menguji upload, wallet, Monad, PIN, dan Station | PostgreSQL serta kredensial development untuk integrasi terkait |
 
-The PRD and BRD are adapted copies of the supplied planning documents. They retain draft assumptions and distinguish planned capabilities from implemented frontend behavior.
+> Situs live dapat dibuka, tetapi jangan menganggap pembayaran, login eksternal, atau cetak fisik sudah teruji end-to-end hanya karena halaman dapat diakses. Batas implementasi dijelaskan di bawah.
 
-## Run locally
+## Mulai cepat: demo lokal
+
+Siapkan [Git](https://git-scm.com/), Node.js **22.12+** (atau 24), dan pnpm **10.19.0**. Jika pnpm belum ada, jalankan `npm install -g pnpm@10.19.0`.
 
 ```bash
+git clone https://github.com/Diannurwahid1/eksara-print.git
+cd eksara-print
 pnpm install
 pnpm dev
-pnpm dev:api
 ```
 
-Open `http://127.0.0.1:3000`. With no API URL, choose **Enter demo workspace** on `/login`. Demo orders and status are stored in the current browser's `localStorage`; only file metadata is retained. The actual file remains in memory for a temporary preview and is never uploaded, shared, or printed. The `/p/demo` handoff preview uses PIN `123456`.
+Buka [http://127.0.0.1:3000/login](http://127.0.0.1:3000/login), lalu pilih **Enter demo workspace**. Tidak perlu membuat `.env` untuk langkah ini. Data demo hanya tersimpan di `localStorage` browser; dokumen tidak diunggah ke server dan tidak benar-benar dicetak. Untuk menghentikan server, tekan `Ctrl+C` di terminal.
 
-To run the Electron station in a second terminal:
+Ingin melihat aplikasi desktopnya juga? Buka terminal kedua di folder repo dan jalankan `pnpm dev:station`. Tanpa koneksi API, antrean Station memang kosong—bukan data contoh yang dibuat-buat.
 
-```bash
-pnpm dev:station
-```
+## Menjalankan alur terhubung di lokal
 
-Station shows an empty queue until connected to the API; it contains no sample orders or revenue. In API mode, Station downloads an authorized PDF or image. Its virtual printer generates and verifies a PDF; physical printer selection opens the file in the desktop viewer for manual printing. The operator confirms completion before local and server storage deletion is attested. This does not verify physical printer output. The renderer is also available at `http://127.0.0.1:5173`, though printer discovery and window controls require Electron.
+Mode ini memerlukan layanan dan kredensial milik Anda. **Jangan commit `.env`, private key, token perangkat, atau dokumen pelanggan.** Penyimpanan berkas memakai direktori privat lokal pada mesin API; S3 tidak diperlukan.
 
-## Connect the backend
+1. Jalankan PostgreSQL, lalu buat database dan pengguna sesuai `DATABASE_URL` yang akan dipakai. Salin `apps/api/.env.example` menjadi `apps/api/.env` dan `apps/web/.env.example` menjadi `apps/web/.env.local`. Di PowerShell, gunakan:
 
-Copy `apps/web/.env.example` to `apps/web/.env.local`, then set the API URL:
+   ```powershell
+   Copy-Item apps/api/.env.example apps/api/.env
+   Copy-Item apps/web/.env.example apps/web/.env.local
+   ```
 
-```env
-NEXT_PUBLIC_API_BASE_URL=https://api.example.com
-```
+   Di macOS/Linux, gunakan `cp` dengan path yang sama.
 
-Set up the API according to `docs/backend-implementation.md`. The API stores uploads under `LOCAL_STORAGE_DIR` on its own machine; there is no S3 dependency. Keep that directory on a persistent private volume, outside the web root. With the API configured, the **Continue with Google** button starts OAuth, the frontend requires a verified wallet before upload, and the wallet signs a Monad one-time grant. A real Print Station install and OS protocol registration are required for the `eksara-station://` handoff.
+2. Isi `DATABASE_URL` di env API. Untuk login Google, isi `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, dan daftarkan redirect URI lokal `http://127.0.0.1:4000/v1/auth/google/callback` pada Google OAuth. Untuk alur izin cetak nyata, isi RPC/chain ID Monad, alamat kontrak terdeploy, relayer, `PIN_PEPPER`, dan `LOCAL_STORAGE_URL_SECRET`. `NEXT_PUBLIC_API_BASE_URL` pada env web harus menunjuk ke `http://127.0.0.1:4000`. Lihat [panduan backend](docs/backend-implementation.md) untuk arti setiap konfigurasi dan batas keamanannya.
 
-For station API development, set `EKSARA_API_BASE_URL` and `EKSARA_STATION_DEVICE_TOKEN` in the station process environment. The latter is a temporary integration credential; production needs device pairing and secure OS credential storage. See [apps/station/README.md](apps/station/README.md) for the station endpoints and remaining printer work.
+3. Jalankan migrasi sekali untuk database **baru**, lalu hidupkan API dan web di terminal terpisah:
 
-## Structure
+   ```bash
+   pnpm --filter @eksara/api migrate
+   pnpm dev:api
+   ```
+
+   ```bash
+   pnpm dev
+   ```
+
+   Periksa [http://127.0.0.1:4000/health](http://127.0.0.1:4000/health). Nilai `configured: true` berarti prasyarat konfigurasi API telah terisi; itu belum menggantikan pengujian tiap layanan eksternal.
+
+4. Untuk menerima handoff di Electron, set `EKSARA_API_BASE_URL=http://127.0.0.1:4000` dan `EKSARA_STATION_DEVICE_TOKEN` yang cocok dengan env API di terminal Station, lalu jalankan `pnpm dev:station`. Lihat [panduan Station](apps/station/README.md) untuk koneksi perangkat dan paket Windows.
+
+Alur pelanggan: masuk dengan Google → verifikasi wallet → unggah dokumen → pilih opsi cetak → tanda tangani izin Monad → bagikan tautan dan PIN → buka di Station → otorisasi cetak virtual → konfirmasi penghapusan. Untuk uji lokal, gunakan dokumen percobaan dan **Eksara Virtual PDF**, bukan dokumen pelanggan atau printer fisik.
+
+### Integrasi tambahan
+
+- **SumoPod** dipakai untuk langganan platform, bukan biaya cetak toko. Isi konfigurasi SumoPod hanya bila ingin menguji checkout. Webhook produksi diarahkan ke `https://ekasra.web.id/api/v1/billing/webhook/sumopod`; callback lokal memerlukan URL publik/tunnel. Redirect kembali dari halaman bayar tidak otomatis mengaktifkan paket—status bergantung pada webhook tervalidasi. Transaksi nyata belum diverifikasi end-to-end.
+- **Google OAuth** hanya dapat dipakai oleh akun yang diizinkan pada consent screen development. Mode demo tidak memakai OAuth.
+- **Monad** menyimpan izin dan hash atestasi, **bukan** isi, nama file, PIN, atau email dokumen. Untuk uji jaringan gunakan kredensial dan dana testnet, bukan private key produksi.
+
+## Yang sudah ada dan batasnya
+
+Web pelanggan menyediakan login, wallet, upload, pengaturan cetak, tautan/PIN/QR, riwayat, dan halaman langganan. API menangani sesi, penyimpanan privat lokal, order, billing, dan relayer. Station menangani antrean, klaim tiket, unduh terotorisasi, serta uji PDF virtual.
+
+Adaptor cetak fisik dan verifikasi spooler **belum** diimplementasikan. Pada printer fisik, Station membuka dokumen di penampil desktop dan operator mengonfirmasi hasilnya secara manual. Atestasi penghapusan hanya mencakup berkas aktif yang dikelola aplikasi, bukan seluruh backup, cache, spooler, atau kertas. Detail status serta pekerjaan sebelum produksi ada di [backend implementation](docs/backend-implementation.md).
+
+## Struktur repo dan perintah berguna
 
 ```text
-apps/web/app/          Next.js routes
-apps/web/components/   Reusable interface pieces
-apps/web/lib/          Types, API adapter, explicit local demo store
-apps/web/public/images Generated illustration
-apps/station/          Electron + React desktop workspace
-apps/api/              NestJS API, database schema, storage, billing, Monad relayer
-contracts/             One-time print protocol Solidity contract
-docs/backend-handoff.md Backend and Electron implementation contract
+apps/web/       Web pelanggan (Next.js)
+apps/api/       API, skema database, storage, billing, relayer (NestJS)
+apps/station/   Aplikasi desktop percetakan (Electron)
+apps/showcase/  Komposisi showcase Remotion (opsional)
+contracts/      Kontrak izin cetak sekali pakai (Solidity)
+docs/           PRD, BRD, dan catatan implementasi
 ```
-
-## Verification
 
 ```bash
 pnpm typecheck
+pnpm test:api
 pnpm build
 pnpm build:api
+pnpm build:station
 pnpm build:contracts
-pnpm test:api
 ```
+
+Dokumentasi lanjutan: [panduan backend](docs/backend-implementation.md) · [panduan Station](apps/station/README.md) · [PRD](docs/Eksara_PRD_Monad_Blitz_v1.md) · [BRD](docs/Eksara_BRD_Monad_Blitz_v1.md).
