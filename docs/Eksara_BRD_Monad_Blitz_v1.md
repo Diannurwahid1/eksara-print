@@ -2,7 +2,7 @@
 
 > **Version:** 1.0 (Draft) | **Date:** 24 Oktober 2026 | **Scope:** Monad Blitz Jogja Vol. 2
 > **Document status:** Specification only; does not assert a deployed product, signed partnerships, or verified revenue.
-> **Penyelarasan identitas/MVP:** Nama produk menjadi Eksara. MVP web pelanggan memakai login Google, sedangkan sistem manajemen print shop terpisah; detail handoff backend/desktop ada di [backend-handoff.md](backend-handoff.md). Wallet pelanggan bersifat opsi masa depan, bukan syarat alur cetak MVP.
+> **Keputusan produk terbaru:** Nama produk Eksara. Pelanggan login Google **dan wajib menautkan wallet sebelum upload**. Wallet menandatangani izin one-time print di Monad; relayer server membayar transaksi. Web pelanggan dan Station terpisah. SumoPod dipakai untuk **langganan paket platform**, bukan biaya cetak. Detail implementasi ada di [backend-implementation.md](backend-implementation.md). Bagian di bawah yang menyebut wallet opsional atau billing fase lanjut adalah asumsi lama yang digantikan keputusan ini.
 
 ---
 
@@ -138,6 +138,9 @@ Nilai ilustrasi tidak dapat digunakan sebagai forecast pasar. Belum termasuk CAC
 | BR-06 | Produk dapat diuji tanpa payment integration. | Tidak memerlukan pembayaran nyata untuk demo. |
 | BR-07 | Dokumen layak diaudit dan dikloning. | Repo publik, README, reproducible steps. |
 | BR-08 | Bisnis memiliki narasi segmen dan pendapatan terukur. | Hypothesis pricing, pilot metrics dan GTM tercantum. |
+| BR-09 | Upload nyata mensyaratkan Google session dan wallet yang telah diverifikasi. | API menolak upload tanpa kedua kredensial; grant ditandatangani wallet. |
+| BR-10 | SumoPod menagih langganan platform dengan nominal dari server. | Webhook valid dan cocok invoice mengaktifkan paket; redirect saja tidak. |
+| BR-11 | Penghapusan file memiliki atestasi terbatas dan tidak dilebih-lebihkan. | Hash evidence dicatat di Monad setelah object saat ini dihapus; UI menyebut batas salinan eksternal. |
 
 ## 9. KPI, asumsi, dan aturan keputusan
 
@@ -160,14 +163,14 @@ Go/no-go pasca-hackathon: lanjut ke pilot hanya setelah alur release benar, peny
 | Operator tidak mau mengubah kebiasaan chat | Adopsi B2B rendah | Onboarding QR < 5 menit, nilai antrean cepat terlihat. |
 | Tidak ada alasan cukup kuat untuk blockchain | Kesulitan diferensiasi/biaya gas | Validasi nilai third-party verification dan bandingkan workflow Web2. |
 | Data pribadi/kontak bocor | Risiko konsumen dan regulasi | Enkripsi, minimisasi data, retention dan privacy review. |
-| Token dan biaya gas menyulitkan | Friksi adopsi massal | Google login untuk pelanggan; relayer server untuk transaksi, wallet opsional di roadmap. |
+| Wallet dan biaya gas menyulitkan | Friksi adopsi massal | Google login untuk akun; wallet wajib untuk upload dan tanda tangan izin; relayer server menanggung transaksi. Uji friksi onboarding. |
 | Pengembangan terlalu luas | MVP tidak selesai | P0 hanya share + print-release + verification. |
 
 ## 11. Peta prioritas dan keputusan produk
 
 | MVP Monad Blitz (P0) | Pasca-hackathon (P1/P2) |
 | --- | --- |
-| Google login, doc demo upload, 1-time share grant, print shop QR, operator print release, verify receipt, Github/README | Actual encryption at scale + KMS, real printer integration, team workspace, SSO, billing, multi-shop, India localization |
+| Google login, wallet verification, doc upload, 1-time share grant, print shop QR, operator print release, verify receipt, SumoPod subscription sandbox, Github/README | Encryption/KMS, native printer and spooler integration, team workspace, SSO, multi-shop, internationalization |
 | Sandbox sample documents; integrasi EVM yang nyata | Sensitive real-world docs after security/legal gate |
 
 ## 12. Rubrik penyelenggara dan strategi bisnis
@@ -185,7 +188,7 @@ Narasi bonus juri: print shop Indonesia sebagai wedge pasar, B2C berbagi dokumen
 
 - Apakah pihak toko bersedia menggunakan dashboard terpisah dari WhatsApp? Apa yang membuatnya lebih cepat?
 
-- Apakah pelanggan perlu wallet opsional untuk memeriksa bukti izin secara independen, atau cukup dengan login Google dan receipt yang dapat diverifikasi?
+- Seberapa besar friksi wallet wajib saat pelanggan pertama kali upload, dan onboarding apa yang dibutuhkan?
 
 - Siapa yang benar-benar memperoleh manfaat ekonomi dari catatan verifikasi on-chain?
 

@@ -1,0 +1,34 @@
+{
+  "name": "@eksara/station",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Eksara Station desktop print shop workspace",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env EKSARA_STATION_DEV_URL=http://127.0.0.1:5173 electron .\"",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test:print": "electron electron/virtual-print-smoke.cjs",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "lucide-react": "^0.468.0",
+    "pdfjs-dist": "^5.7.284",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^45.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^8.3.5",
+    "wait-on": "^9.0.3"
+  }
+}

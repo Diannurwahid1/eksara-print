@@ -1,5 +1,6 @@
 node_modules/
 .next/
+.next-build/
 .turbo/
 *.tsbuildinfo
 .env
@@ -7,6 +8,9 @@ node_modules/
 .env.*.local
 dist/
 coverage/
+contracts/out/
+/apps/api/data/
+/station-capture.png*
 
 # Local reference materials supplied for the design brief
 /blueprint-stack.md
@@ -14,3 +18,4 @@ coverage/
 /*_PRD_Monad_Blitz_v1.md
 /mcokup.png
 /Logo Ekasra dengan Ikon Dokumen Aman.png
+/Mockup Dasbor Manajemen Percetakan Eksara.png

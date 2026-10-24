@@ -16,7 +16,7 @@ export default function ReceivePage() {
   const [pin, setPin] = useState(""); const [error, setError] = useState(""); const [loading, setLoading] = useState(false);
   const [ticket, setTicket] = useState(""); const [attempted, setAttempted] = useState(false);
   useEffect(() => { if (apiBase) getPublicGrant(token).then(setGrant).catch(() => setError("This link is invalid or no longer available.")); else { const o = readOrders().find((x) => x.token === token); if (o) { setLocalOrder(o); setGrant({ fileName: o.fileName, expiresAt: o.expiresAt, status: o.status }); } else if (token === "demo") setGrant({ fileName: "Example-Proposal.pdf", expiresAt: new Date(Date.now() + 86400000).toISOString(), status: "shared" }); else setError("This link is invalid or no longer available in this browser."); } }, [token]);
-  const expired = grant && (new Date(grant.expiresAt).getTime() < Date.now() || ["expired", "revoked", "printed"].includes(grant.status));
+  const expired = grant && (new Date(grant.expiresAt).getTime() < Date.now() || ["expired", "revoked", "opened", "processing", "printed"].includes(grant.status));
   function openStation(value: string) { setAttempted(true); window.location.href = `eksara-station://claim?ticket=${encodeURIComponent(value)}`; }
   async function verify() {
     if (!/^\d{6}$/.test(pin)) { setError("Enter the 6-digit PIN."); return; }

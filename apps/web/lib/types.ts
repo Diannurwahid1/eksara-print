@@ -19,5 +19,10 @@ export type Order = {
   expiresAt: string;
   status: OrderStatus;
   chainTxHash?: string;
+  deletionEvidenceHash?: string;
+  attestationTxHash?: string;
+  deletedAt?: string;
+  printMode?: "operator_attested" | "virtual_pdf_test";
+  virtualOutputHash?: string;
 };
-export type User = { name: string; email: string; picture?: string };
+export type User = { name: string; email: string; picture?: string; walletAddress?: string | null };

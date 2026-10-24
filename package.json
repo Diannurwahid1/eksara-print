@@ -4,7 +4,16 @@
   "packageManager": "pnpm@10.19.0",
   "scripts": {
     "dev": "pnpm --filter @eksara/web dev",
+    "dev:api": "pnpm --filter @eksara/api dev",
+    "dev:station": "pnpm --filter @eksara/station dev",
     "build": "pnpm --filter @eksara/web build",
-    "typecheck": "pnpm --filter @eksara/web typecheck"
+    "build:api": "pnpm --filter @eksara/api build",
+    "build:contracts": "solcjs --bin --abi contracts/src/OneTimePrintProtocol.sol --output-dir contracts/out",
+    "build:station": "pnpm --filter @eksara/station build",
+    "typecheck": "pnpm -r typecheck",
+    "test:api": "pnpm --filter @eksara/api test"
+  },
+  "devDependencies": {
+    "solc": "0.8.26"
   }
 }

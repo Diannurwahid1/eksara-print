@@ -1,6 +1,6 @@
 # Eksara — Product Requirements & Architecture Draft (PRD)
 
-> **Versi 1.0 (draft), 24 Oktober 2026.** Dokumen ini diadaptasi dari PRD yang diberikan untuk proyek Eksara. Keputusan MVP terbaru: pelanggan masuk dengan Google, web pelanggan dan manajemen print shop adalah aplikasi terpisah, dan tautan/PIN/QR membuka Eksara Station melalui tiket sekali pakai. Kontrak implementasi yang lebih rinci ada di [backend-handoff.md](backend-handoff.md). Layanan backend, desktop, dan transaksi Monad belum dinyatakan sudah berjalan.
+> **Versi 1.1 (draft), 24 Oktober 2026.** Dokumen ini diadaptasi dari PRD yang diberikan untuk proyek Eksara. Keputusan terbaru: pelanggan login Google **dan wajib menautkan wallet sebelum upload**; wallet menandatangani grant Monad. Web pelanggan dan Station adalah aplikasi terpisah; tautan/PIN/QR membuka Station melalui tiket sekali pakai. SumoPod hanya membayar **langganan paket platform**. Dokumen disimpan di direktori lokal privat pada host API, bukan S3. Rincian implementasi dan batas kesiapan ada di [backend-implementation.md](backend-implementation.md). Pernyataan lama di bawah yang menempatkan wallet atau billing sebagai opsi fase lanjut digantikan oleh keputusan ini.
 
 Eksara memakai arsitektur API-first supaya web pelanggan, dashboard toko, dan aplikasi desktop menggunakan satu backend yang sama. Permukaan produk dipisahkan dalam satu monorepo.
 
@@ -64,7 +64,7 @@ Web dan Desktop berkomunikasi melalui API yang sama. Desktop menjadi satu-satuny
 | Printer Engine | Electron printing + Windows-native adapter | Printer discovery, print job, spooler monitoring  |
 | Database       | PostgreSQL + Drizzle ORM                   | Multi-tenant SaaS                                 |
 | Cache / Queue  | Redis + BullMQ                             | Pemrosesan asinkron dan background worker         |
-| Storage        | S3-compatible private object storage       | Dokumen terenkripsi                               |
+| Storage        | Direktori lokal privat pada host API        | Dokumen disimpan off-chain; enkripsi volume diperlukan sebelum data nyata |
 | Realtime       | WebSocket / Socket.IO                      | Notifikasi order dan status perangkat             |
 | Blockchain     | Monad + Solidity + Foundry + viem          | Single-use authorization                          |
 | Monorepo       | pnpm workspaces + Turborepo                | Satu repository untuk seluruh aplikasi            |
@@ -256,7 +256,7 @@ Alchemy
 
 
 
-Perhatikan bahwa single-use di smart contract tidak otomatis berarti satu cetakan fisik. Harus ada state machine untuk menangani kegagalan printer dan mencegah retry yang menghasilkan cetakan ganda. Untuk pelanggan tanpa wallet, bukti on-chain merupakan bukti penggunaan izin oleh sistem Eksara, bukan tanda tangan langsung pelanggan.
+Perhatikan bahwa single-use di smart contract tidak otomatis berarti satu cetakan fisik. Harus ada state machine untuk menangani kegagalan printer dan mencegah retry yang menghasilkan cetakan ganda. Pada alur terbaru, pelanggan wajib menautkan wallet dan menandatangani grant; atestasi penghapusan tetap merupakan klaim terbatas atas current object storage, bukan bukti semua salinan musnah.
 
 ## 9. Deployment yang saya sarankan
 
@@ -278,11 +278,11 @@ Managed / VPS
 
 Database dan queue dengan autentikasi, backup, serta akses jaringan privat.
 
-S3 Storage
+Local Document Storage
 
-Private Bucket
+Private API-host directory
 
-Dokumen terenkripsi dan masa retensi pendek.
+Izin akses terbatas dan masa retensi pendek; enkripsi volume belum dikonfigurasi.
 
 Eksara Station
 
@@ -310,6 +310,6 @@ Untuk menghemat biaya awal, API, worker, PostgreSQL, dan Redis bisa dijalankan d
 
 Saya akan mengunci stack ini sebagai baseline Eksara v1. Hindari mengembangkan API Next.js terpisah dari NestJS, karena itu akan menduplikasi logika dan menyulitkan desktop.
 
-Urutan implementasi terbaik adalah NestJS API + Database → Customer Web → Electron Station + Printer → Monad Authorization → SaaS Billing. Untuk kebutuhan hackathon, kita cukup menyelesaikan alur end-to-end terlebih dahulu, kemudian menambahkan fitur subscription dan multi-tenant komersial setelahnya.
+Urutan implementasi keputusan terbaru adalah NestJS API + Database → Customer Web + wallet → Electron Station → Monad Authorization → SumoPod subscription → hardening printer dan multi-tenant. Kode MVP awal sudah dibuat; deployment, layanan eksternal, dan pengujian printer nyata masih dibutuhkan sebelum produksi.
 
 Dengan pendekatan ini, Eksara mempunyai fondasi yang bisa dikembangkan dari satu toko pilot menjadi SaaS untuk banyak print shop tanpa harus membangun ulang arsitektur intinya.
