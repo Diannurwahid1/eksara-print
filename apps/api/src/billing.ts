@@ -42,7 +42,7 @@ export class BillingService {
   async checkout(userId: string, plan: "pro" | "team") {
     const baseUrl = process.env.SUMOPOD_BASE_URL;
     const key = process.env.SUMOPOD_API_KEY;
-    if (!baseUrl || !key) throw new ServiceUnavailableException("SumoPod is not configured");
+    if (!baseUrl || !key) throw new ServiceUnavailableException("Payment service is not configured");
     const invoiceId = randomUUID();
     const amount = plans[plan];
     await this.db.query("INSERT INTO invoices (id,owner_user_id,plan,amount_idr,status) VALUES ($1,$2,$3,$4,'pending')", [invoiceId, userId, plan, amount]);
@@ -56,13 +56,19 @@ export class BillingService {
           cancel_return_url: `${appOrigin}/app/billing?invoice=${invoiceId}`,
           payment_method_type_code: "QRIS" })
       });
-    } catch { throw new BadGatewayException("SumoPod is unavailable. Please retry checkout."); }
-    if (!response.ok) throw new BadGatewayException("SumoPod checkout could not be created");
-    const payment = await response.json() as { payment_id?: string; payment_link_url?: string; order_id?: string; amount?: number };
-    if (!payment.payment_id || !payment.payment_link_url || payment.order_id !== `EXS-${invoiceId}` || payment.amount !== amount)
-      throw new BadGatewayException("Unexpected SumoPod checkout response");
-    const url = new URL(payment.payment_link_url);
-    if (url.protocol !== "https:" || !(url.hostname === "sumopod.com" || url.hostname.endsWith(".sumopod.com"))) throw new BadGatewayException("Untrusted SumoPod payment URL");
+    } catch { throw new BadGatewayException("Payment service is unavailable. Please retry checkout."); }
+    if (!response.ok) throw new BadGatewayException("Payment checkout could not be created");
+    if (!response.headers.get("content-type")?.includes("application/json"))
+      throw new BadGatewayException("Payment service returned an invalid response");
+    let payment: { payment_id?: string; payment_link_url?: string; order_id?: string; amount?: number };
+    try { payment = await response.json(); }
+    catch { throw new BadGatewayException("Payment service returned an invalid response"); }
+    if (!payment || typeof payment !== "object" || !payment.payment_id || !payment.payment_link_url || payment.order_id !== `EXS-${invoiceId}` || payment.amount !== amount)
+      throw new BadGatewayException("Payment service returned an incomplete response");
+    let url: URL;
+    try { url = new URL(payment.payment_link_url); }
+    catch { throw new BadGatewayException("Payment service returned an invalid payment URL"); }
+    if (url.protocol !== "https:" || !(url.hostname === "sumopod.com" || url.hostname.endsWith(".sumopod.com"))) throw new BadGatewayException("Untrusted payment URL");
     await this.db.query("UPDATE invoices SET payment_id=$1,payment_url=$2 WHERE id=$3", [payment.payment_id, url.toString(), invoiceId]);
     return { invoiceId, paymentUrl: url.toString(), amountIdr: amount, plan };
   }

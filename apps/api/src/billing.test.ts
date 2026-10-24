@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createHmac, randomBytes } from "node:crypto";
 import { test } from "node:test";
+import { BadGatewayException } from "@nestjs/common";
 import { BillingService, verifySumopodSignature } from "./billing";
 import type { Database } from "./database";
 
@@ -44,4 +45,21 @@ test("completed webhook activates one subscription and rejects wrong invoice amo
   invoice.status = "pending";
   await assert.rejects(() => billing.webhook("evt-2", wrong), /Payment does not match invoice/);
   assert.equal(activations, 1);
+});
+
+test("checkout reports a gateway error when payment service returns HTML", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalBaseUrl = process.env.SUMOPOD_BASE_URL;
+  const originalKey = process.env.SUMOPOD_API_KEY;
+  process.env.SUMOPOD_BASE_URL = "https://payments.example.test";
+  process.env.SUMOPOD_API_KEY = "test-key";
+  globalThis.fetch = async () => new Response("<!DOCTYPE html>", { status: 200, headers: { "content-type": "text/html" } });
+  const db = { query: async () => ({ rows: [], rowCount: 1 }) } as unknown as Database;
+  try {
+    await assert.rejects(() => new BillingService(db).checkout("user-1", "pro"), BadGatewayException);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalBaseUrl === undefined) delete process.env.SUMOPOD_BASE_URL; else process.env.SUMOPOD_BASE_URL = originalBaseUrl;
+    if (originalKey === undefined) delete process.env.SUMOPOD_API_KEY; else process.env.SUMOPOD_API_KEY = originalKey;
+  }
 });

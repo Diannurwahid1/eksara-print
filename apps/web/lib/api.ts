@@ -1,14 +1,21 @@
 import { apiBase } from "./demo";
 import type { Order, PrintOptions, User } from "./types";
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${apiBase}${path}`, { credentials: "include", ...init, headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...init?.headers } });
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.message || `Request failed (${response.status})`);
+  if (!response.headers.get("content-type")?.includes("application/json")) {
+    throw new Error(`Layanan sedang tidak tersedia (HTTP ${response.status}). Coba muat ulang halaman.`);
   }
-  return response.json() as Promise<T>;
+  let body: unknown;
+  try { body = await response.json(); }
+  catch { throw new Error("Respons layanan tidak valid. Silakan coba lagi."); }
+  if (!response.ok) {
+    const message = typeof body === "object" && body !== null && "message" in body ? String(body.message) : "";
+    throw new Error(message || `Permintaan gagal (HTTP ${response.status}).`);
+  }
+  return body as T;
 }
+const request = apiRequest;
 export async function getMe() { return request<User>("/v1/me"); }
 type EthereumProvider = { request(args: { method: string; params?: unknown[] }): Promise<unknown> };
 function provider(): EthereumProvider {
