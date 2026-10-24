@@ -1,0 +1,10 @@
+{
+  "name": "eksara",
+  "private": true,
+  "packageManager": "pnpm@10.19.0",
+  "scripts": {
+    "dev": "pnpm --filter @eksara/web dev",
+    "build": "pnpm --filter @eksara/web build",
+    "typecheck": "pnpm --filter @eksara/web typecheck"
+  }
+}

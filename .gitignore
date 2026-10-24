@@ -1,0 +1,16 @@
+node_modules/
+.next/
+.turbo/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+dist/
+coverage/
+
+# Local reference materials supplied for the design brief
+/blueprint-stack.md
+/*_BRD_Monad_Blitz_v1.md
+/*_PRD_Monad_Blitz_v1.md
+/mcokup.png
+/Logo Ekasra dengan Ikon Dokumen Aman.png
