@@ -1,5 +1,5 @@
 param(
-  [string]$ApiBaseUrl = 'https://ekastra.web.id/api'
+  [string]$ApiBaseUrl = 'https://ekasra.web.id/api'
 )
 
 $ErrorActionPreference = 'Stop'
