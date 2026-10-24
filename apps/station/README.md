@@ -32,6 +32,8 @@ EKSARA_STATION_DEVICE_TOKEN=paired-device-development-token
 
 For local development, `http://127.0.0.1:<port>` is allowed. The token is kept in Electron main process and never exposed through the preload API. Run `pnpm --filter @eksara/station test:print` to exercise the virtual PDF printer locally. An environment variable is only an integration placeholder; replace it with device pairing and OS credential storage before using real customer files.
 
+On the development Windows machine, run `powershell -ExecutionPolicy Bypass -File apps/station/start-connected.ps1` from the repository root to launch the built Station against `https://ekastra.web.id/api`. The script reads only the Station token from the ignored local `apps/api/.env`. It does not embed the credential in the renderer or Git. DNS and trusted HTTPS for the domain must be active first.
+
 Current endpoints are in [backend-implementation.md](../../docs/backend-implementation.md): `GET /v1/station/jobs`, `POST /v1/station/handoffs/claim`, `GET /v1/station/jobs/{id}`, `POST /v1/station/jobs/{id}/authorize-release`, and `POST /v1/station/jobs/{id}/complete`. Shop/device binding and scoped tenant reads remain production work.
 
 ## Before physical printing

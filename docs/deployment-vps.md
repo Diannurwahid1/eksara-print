@@ -4,6 +4,8 @@ Target: `ubuntu@43.157.229.224`, checkout `/home/ubuntu/eksara-print`. The web b
 
 `apps/api/.env` and `apps/web/.env.local` are private files on the server and ignored by Git. They originate from the local development configuration, with production URL, port, database, storage path, and secure cookie changes. Do not commit or print these files. Station uses `EKSARA_API_BASE_URL=https://ekastra.web.id/api` and a paired `EKSARA_STATION_DEVICE_TOKEN` matching the API environment.
 
+For the development Windows machine, `apps/station/start-connected.ps1` reads the same Station token from its ignored `apps/api/.env` and launches the built Electron app with the production API URL. This is a development pairing bridge, not a distributable or tenant-scoped credential system.
+
 ## Activation
 
 1. Point the `A` record for `ekastra.web.id` to `43.157.229.224`.
