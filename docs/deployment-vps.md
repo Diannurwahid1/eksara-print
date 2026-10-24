@@ -6,12 +6,16 @@ Target: `ubuntu@43.157.229.224`, checkout `/home/ubuntu/eksara-print`. The web b
 
 For the development Windows machine, `apps/station/start-connected.ps1` reads the same Station token from its ignored `apps/api/.env` and launches the built Electron app with the production API URL. This is a development pairing bridge, not a distributable or tenant-scoped credential system.
 
-## Activation
+## Live status (24 October 2026)
 
-1. Point the `A` record for `ekasra.web.id` to `43.157.229.224`.
-2. Obtain a trusted TLS certificate for the domain, then redirect HTTP to HTTPS. The checked-in Nginx file is HTTP bootstrap configuration; secure sessions and Station HTTPS require this step.
-3. Add `https://ekasra.web.id/api/v1/auth/google/callback` to the Google OAuth client's authorized redirect URIs. Configure the SumoPod webhook as `https://ekasra.web.id/api/v1/billing/webhook/sumopod`.
-4. Test Google login, wallet signing on the configured Monad network, sandbox subscription payment, share/PIN handoff, Station virtual print, and deletion attestation before accepting customer files.
+The Cloudflare-proxied `A` record points to `43.157.229.224`. Let's Encrypt issued a trusted origin certificate for `ekasra.web.id` (expires 22 January 2027), Certbot enabled HTTPS/HTTP redirect and scheduled renewal. Both Cloudflare HTTPS and direct origin HTTPS returned web and API 200 with valid certificates. The paired Station token returned an empty real queue from the public API. Set Cloudflare SSL/TLS encryption mode to **Full (strict)** so Cloudflare verifies the origin certificate.
+
+The following external account settings and flow tests remain:
+
+1. Add `https://ekasra.web.id/api/v1/auth/google/callback` to the Google OAuth client's authorized redirect URIs. Configure the SumoPod webhook as `https://ekasra.web.id/api/v1/billing/webhook/sumopod`.
+2. Test Google login, wallet signing on the configured Monad network, sandbox subscription payment, share/PIN handoff, Station virtual print, and deletion attestation before accepting customer files.
+
+The checked-in Nginx file is HTTP bootstrap configuration. Certbot updated the active file at `/etc/nginx/sites-available/ekasra.web.id` with certificate and redirect directives; do not overwrite it with the bootstrap file during routine deploys.
 
 On the server, after a reviewed push to `main`:
 
