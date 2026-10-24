@@ -1,0 +1,20 @@
+[Unit]
+Description=Eksara customer web
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/eksara-print/apps/web
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /home/ubuntu/eksara-print/apps/web/node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3087
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
